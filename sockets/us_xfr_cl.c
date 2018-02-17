@@ -22,7 +22,7 @@
 int
 main(int argc, char *argv[])
 {
-    struct sockaddr_un addr;
+	struct sockaddr_un addr, un;
     int sfd;
     ssize_t numRead;
     char buf[BUF_SIZE];
@@ -37,6 +37,11 @@ main(int argc, char *argv[])
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, SV_SOCK_PATH, sizeof(addr.sun_path) - 1);
 
+    memset(&un, 0, sizeof(struct sockaddr_un));
+    un.sun_family = AF_UNIX;
+    strncpy(un.sun_path, "/tmp/us_xfr_cl", sizeof(un.sun_path) - 1);
+    bind(sfd, (struct sockaddr *)&un, sizeof(un));
+    
     if (connect(sfd, (struct sockaddr *) &addr,
                 sizeof(struct sockaddr_un)) == -1)
         errExit("connect");

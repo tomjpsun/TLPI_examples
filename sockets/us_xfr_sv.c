@@ -23,7 +23,9 @@
 int
 main(int argc, char *argv[])
 {
-    struct sockaddr_un addr;
+	struct sockaddr_un addr;
+	struct sockaddr_storage peer;
+	socklen_t length;
     int sfd, cfd;
     ssize_t numRead;
     char buf[BUF_SIZE];
@@ -60,11 +62,17 @@ main(int argc, char *argv[])
            socket, 'cfd'; the listening socket ('sfd') remains open
            and can be used to accept further connections. */
 
-        cfd = accept(sfd, NULL, NULL);
-        if (cfd == -1)
-            errExit("accept");
+	    cfd = accept(sfd, (struct sockaddr *)&peer, &length);
+	    if (cfd == -1) {
+		printf("error accept\n");
+		errExit("accept");
+	    }
+	else {
+		struct sockaddr_un* peer_un = (struct sockaddr_un *)&peer;
+		printf("peer_un = %s, len = %d\n", peer_un->sun_path, length);
+	}
 
-        /* Transfer data from connected socket to stdout until EOF */
+	    /* Transfer data from connected socket to stdout until EOF */
 
         while ((numRead = read(cfd, buf, BUF_SIZE)) > 0)
             if (write(STDOUT_FILENO, buf, numRead) != numRead)
